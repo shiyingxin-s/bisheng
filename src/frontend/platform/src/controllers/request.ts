@@ -3,7 +3,7 @@ import axios from "axios";
 import i18next from "i18next";
 axios.defaults.withCredentials = true;
 const customAxios = axios.create({
-    baseURL: import.meta.env.BASE_URL
+    baseURL: 'https://bisheng.dataelem.com'
     // 配置
 });
 export const requestInterceptor = {

@@ -8,8 +8,8 @@ import svgr from "vite-plugin-svgr";
 
 // Use environment variable to determine the target.
 //  const target = process.env.VITE_PROXY_TARGET || "http://127.0.0.1:7860";
- const target = process.env.VITE_PROXY_TARGET || "http://192.168.106.120:3002";
-const apiRoutes = ["^/api/", "/health"];
+ const target = process.env.VITE_PROXY_TARGET || "https://bisheng.dataelem.com";
+const apiRoutes = ["^/api/", "/health", "^/get_captcha", "^/login", "^/logout", "^/register", "^/user"];
 
 const proxyTargets = apiRoutes.reduce((proxyObj, route) => {
   proxyObj[route] = {
@@ -17,13 +17,14 @@ const proxyTargets = apiRoutes.reduce((proxyObj, route) => {
     changeOrigin: true,
     withCredentials: true,
     secure: false,
-    ws: true
+    ws: true,
+    rewrite: (path) => path
   };
   return proxyObj;
 }, {});
 // 文件服务地址
 proxyTargets['/bisheng'] = {
-  target: "http://192.168.106.116:9000",
+  target: target,
   changeOrigin: true,
   withCredentials: true,
   secure: false
@@ -36,12 +37,16 @@ proxyTargets['/custom_base/api'] = {
   secure: false,
   rewrite: (path) => {
     return path.replace(/^\/custom_base\/api/, '/api');
-  },
-  configure: (proxy, options) => {
-    proxy.on('proxyReq', (proxyReq, req, res) => {
-      console.log('Proxying request to:', proxyReq.path);
-    });
   }
+}
+
+// 添加通配符代理，处理所有其他请求
+proxyTargets['^/.*'] = {
+  target: target,
+  changeOrigin: true,
+  withCredentials: true,
+  secure: false,
+  rewrite: (path) => path
 }
 
 /**
